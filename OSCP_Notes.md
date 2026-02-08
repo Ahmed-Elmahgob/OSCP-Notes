@@ -1,11 +1,19 @@
 # Network Enumeration
 ```bash
-nmap <IP> -sC -sV -on Nmap.txt
-nmap <IP> -sC -sV -oG Nmap.txt
-nmap -A <IP>
-nmap -Pn -p- <IP>
-nmap -sV -sU <IP>
-nmap -sU <IP> -p 1-1000
+sudo nmap <IP> -sC -sV -on Nmap.txt
+sudo nmap <IP> -sC -sV -oG Nmap.txt
+sudo nmap -A <IP>
+sudo nmap -Pn -p- <IP>                #use -Pn option if you're getting nothing in the scan
+sudo nmap -sV -sU <IP>
+sudo nmap -sU <IP> -p 1-1000
+```
+#NSE
+```bash
+updatedb
+locate .nse | grep <name>
+sudo nmap --script="name" <IP>                                                                                                        #here we can specify other options like specific ports...etc
+Test-NetConnection -Port <port> <IP>                                                                                                              #powershell utility
+1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("IP", $_)) "TCP port $_ is open"} 2>$null                                                                         #automating port scan of first 1024 ports in powershell
 ```
 
 Snmp
@@ -44,46 +52,13 @@ hydra -L users.txt -P passwords.txt <IP> ssh
 
 #check for vulnerabilities associated with the version identified.
 
+# mysql login
 ```bash
 Mysql -u  user  -p   -P port -h host-ip
 ```
 
-Recon and Enumeration
-	• OSINT OR Passive Recon
-💡 Not that useful for OSCP as we’ll be dealing with internal machines
-		○ whois: whois <domain> or whois <domain> -h <IP>
-		○ Google Dorking,
-			§ site
-			§ filetype
-			§ intitle
-			§ GHDB - Google hacking database
-		○ OS and Service Information using searchdns.netcraft.com
-		○ Github Dorking
-			§ filename
-			§ user
-			§ A tool called Gitleaks for automated enumeration
-		○ Shodan dorks
-			§ hostname
-			§ port
-			§ Then gather information by going through the options
-		○ Scanning Security headers and SSL/TLS using https://securityheaders.com/
-Port Scanning
 
-#use -Pn option if you're getting nothing in the scan
-```bash
-nmap -sC -sV <IP> -v #Basic scan
-nmap -T4 -A -p- <IP> -v #complete scan
-sudo nmap -sV -p 443 --script "vuln" 192.168.50.124                                                                #running vuln category scripts
-```
 
-#NSE
-```bash
-updatedb
-locate .nse | grep <name>
-sudo nmap --script="name" <IP>                                                                                                        #here we can specify other options like specific ports...etc
-Test-NetConnection -Port <port> <IP>                                                                                                              #powershell utility
-1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("IP", $_)) "TCP port $_ is open"} 2>$null                                                                         #automating port scan of first 1024 ports in powershell
-```
 
 FTP enumeration
 
@@ -139,11 +114,11 @@ wpscan --url http://$ip -e p,t,u --detection-mode aggressive > wpscan.log
 wpscan --url http://192.168.128.239:80 -e u -P /usr/share/wordlists/rockyou.txt
 ```
 
-# basic usage
+basic usage
 ```bash
 wpscan --url "target" --verbose
 ```
-# enumerate vulnerable plugins, users, vulnerable themes, timthumbs
+enumerate vulnerable plugins, users, vulnerable themes, timthumbs
 ```bash
 wpscan --url "target" --enumerate vp,u,vt,tt --follow-redirection --verbose --log target.log
 ```
@@ -2320,5 +2295,6 @@ shutdown
 ```bash
 cmd.exe /c "shutdown /r /t 0"
 ```
+
 
 
