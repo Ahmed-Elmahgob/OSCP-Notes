@@ -26,6 +26,7 @@ Strings snmp.txt                                                              to
 ftp <IP>
 
 #login if you have relevant creds or based on nmap scan find out whether this has an anonymous login or not, then login with Anonymous:password
+always try default creds anonymous:anonymous $ ftp:ftp
 
 put <file> #uploading file
 get <file> #downloading file
@@ -1019,4 +1020,5 @@ https://github.com/Greenwolf/ntlm_theft
 https://github.com/AtvikSecurity/CentralizedPotatoes
 https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 https://github.com/saisathvik1/OSCP-Cheatsheet
+
 
