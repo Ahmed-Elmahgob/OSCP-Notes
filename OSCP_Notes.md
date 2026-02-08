@@ -2,6 +2,10 @@
 ```bash
 nmap <IP> -sC -sV -on Nmap.txt
 nmap <IP> -sC -sV -oG Nmap.txt
+nmap -A <IP>
+nmap -Pn -p- <IP>
+nmap -sV -sU <IP>
+nmap -sU <IP> -p 1-1000
 ```
 
 Snmp
@@ -2316,4 +2320,5 @@ shutdown
 ```bash
 cmd.exe /c "shutdown /r /t 0"
 ```
+
 
