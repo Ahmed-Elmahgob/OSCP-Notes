@@ -4,9 +4,9 @@
 ### General & Port Scanning
 ```bash
 #use -Pn option if you're getting nothing in the scan
-nmap -sC -sV <IP> -v #Basic scan
-nmap -T4 -A -p- <IP> -v #complete scan
-sudo nmap -sV -p 443 --script "vuln" 192.168.50.124                                                                #running vuln category scripts
+sudo nmap -sC -sV <IP> -v #Basic scan
+sudo nmap -T4 -A -p- <IP> -v #complete scan
+sudo nmap -Pn -p- <IP>
 
 #NSE
 updatedb
@@ -129,7 +129,7 @@ WhatWeb http://usage.htb/
 
 ## Web Enumeration - CMS (WordPress)
 ```bash
-wpscan --url http://192.168.128.239:80 -e t,u,vp  --random-user-agent --api-token KGyPxmrhgni7v36FsWYlssljVICEYjFM5DRrBZOV0Ic
+wpscan --url http://192.168.128.239:80 -e t,u,vp  --random-user-agent --api-token Mfrefgghsjgs
 wpscan --url http://$ip -e p,t,u --detection-mode aggressive > wpscan.log
 wpscan --url http://192.168.128.239:80 -e u -P /usr/share/wordlists/rockyou.txt
 
@@ -162,6 +162,7 @@ git-dumper http://dev.linkvortex.htb/.git dump
 	Git show
 ```
 Git-Hack Tool 
+https://github.com/WangYihang/GitHacker
 
 SQL injection in login Form
 ```bash
@@ -508,7 +509,7 @@ Bypass-4MSI
 Invoke-Mimikatz.ps1
 ```
 
-### Impacket Reference
+### Lateral Movement - Impacket
 ```bash
 psexec.py test.local/john:password123@10.10.10.1
 psexec.py -hashes lmhash:nthash test.local/john@10.10.10.1
@@ -971,3 +972,18 @@ source venv/bin/activate
 cmd.exe /c "shutdown /r /t 0"
 ```
 
+usefull links
+
+https://github.com/jakobfriedl/precompiled-binaries/tree/main
+https://ironhackers.es/en/cheatsheet/transferir-archivos-post-explotacion-cheatsheet/
+https://gtfobins.github.io/
+https://github.com/bugch3ck/SharpEfsPotato
+https://swisskyrepo.github.io/InternalAllTheThings/
+https://arth0s.medium.com/ligolo-ng-pivoting-reverse-shells-and-file-transfers-6bfb54593fa5
+https://ph03n1x.net/ligolo-cheatsheet/
+https://www.hackingarticles.in/windows-privilege-escalation-sebackupprivilege/
+https://www.bordergate.co.uk/backup-operator-privilege-escalation/
+https://github.com/Greenwolf/ntlm_theft
+https://github.com/AtvikSecurity/CentralizedPotatoes
+https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+https://github.com/saisathvik1/OSCP-Cheatsheet
