@@ -130,7 +130,7 @@ checked the application stack using
 Wordpress scanner
 
 ```bash
-wpscan --url http://192.168.128.239:80 -e t,u,vp  --random-user-agent --api-token KGyPxmrhgni7v36FsWYlssljVICEYjFM5DRrBZOV0Ic
+wpscan --url http://192.168.128.239:80 -e t,u,vp  --random-user-agent --api-token fgdfgd
 wpscan --url http://$ip -e p,t,u --detection-mode aggressive > wpscan.log
 wpscan --url http://192.168.128.239:80 -e u -P /usr/share/wordlists/rockyou.txt
 ```
@@ -327,7 +327,7 @@ smbclient //server/share
 smbclient //server/share -U <username>
 mbclient //server/share -U domain/username
 
-impacket-smbclient usalahaldien@USALAHALDIEN-LT.SURE.COM.SA -hashes :2385e2c9d18f87ce81bee8ba91874c5d
+impacket-smbclient username@domain -hashes :2385e2c9d18f87ce81bee8ba91874c5d
 
 impacket-smbclient "<username>":"password"@192.168.20.20
 impacket-smbclient ss:""@192.168.20.20
@@ -2316,3 +2316,4 @@ shutdown
 ```bash
 cmd.exe /c "shutdown /r /t 0"
 ```
+
