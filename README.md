@@ -79,7 +79,7 @@ Windows full points: shell as **SYSTEM**, **Administrator**, or Administrators. 
 
 ### Restrictions
 
-**Banned:** spoofing (IP/ARP/DNS/NBNS/LLMNR poison); commercial Pro tools (Burp Pro, Metasploit Pro); automatic exploitation (**SQLmap**, SQLninja, db_autopwn); mass scanners (Nessus, OpenVAS); AI chatbots/LLMs during the **exam and the report** (ChatGPT, KAI, Gemini, Copilot, DeepSeek).
+**Banned:** spoofing (IP/ARP/DNS/NBNS/LLMNR poison); automatic exploitation (**SQLmap**, SQLninja, db_autopwn); mass scanners (Nessus, OpenVAS); AI chatbots/LLMs during the **exam and the report** (ChatGPT, KAI, Gemini, Copilot, DeepSeek).
 
 Notion-style organisers and Google AI Overview are allowed. Interactive “ask the model to solve this” is not. [AI Usage Policy](https://help.offsec.com/hc/en-us/articles/35549468971156-AI-Usage-Policy-in-OffSec-Exams).
 
