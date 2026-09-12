@@ -79,11 +79,11 @@ Windows full points: shell as **SYSTEM**, **Administrator**, or Administrators. 
 
 ### Restrictions
 
-**Banned:** spoofing (IP/ARP/DNS/NBNS/LLMNR poison); commercial Pro tools (Burp Pro, Metasploit Pro); automatic exploitation (**SQLmap**, SQLninja, db_autopwn); mass scanners (Nessus, OpenVAS); AI chatbots/LLMs during the **exam and the report** (ChatGPT, KAI, Gemini, Copilot, DeepSeek).
+**Banned:** spoofing (IP/ARP/DNS/NBNS/LLMNR poison); automatic exploitation (**SQLmap**, SQLninja, db_autopwn); mass scanners (Nessus, OpenVAS); AI chatbots/LLMs during the **exam and the report** (ChatGPT, KAI, Gemini, Copilot, DeepSeek).
 
 Notion-style organisers and Google AI Overview are allowed. Interactive “ask the model to solve this” is not. [AI Usage Policy](https://help.offsec.com/hc/en-us/articles/35549468971156-AI-Usage-Policy-in-OffSec-Exams).
 
-**Allowed examples (FAQ, not exhaustive):** Nmap/NSE, Nikto, Burp Community, DirBuster-style discovery, BloodHound Legacy/CE, SharpHound, PowerView, Rubeus, evil-winrm, CrackMapExec/NetExec, Mimikatz, Impacket, PrintSpoofer.
+**Allowed examples (FAQ, not exhaustive):** Nmap/NSE, Nikto, Burp , DirBuster-style discovery, BloodHound Legacy/CE, SharpHound, PowerView, Rubeus, evil-winrm, CrackMapExec/NetExec, Mimikatz, Impacket, PrintSpoofer.
 
 **Responder** is listed as allowed; **poisoning/spoofing is not**. Open book: notes, Google, OffSec platform. Do not discuss **this** exam anywhere.
 
